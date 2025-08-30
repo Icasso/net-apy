@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Net APY Calculator</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f5f5f5;
+        color: #333;
+        line-height: 1.6;
+      }
+      .container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .input-section {
+        background: white;
+        padding: 30px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+      }
+      .results-section {
+        background: white;
+        padding: 30px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        height: fit-content;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-weight: 400;
+        font-size: 24px;
+      }
+      h3 {
+        color: #555;
+        font-weight: 500;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #555;
+        font-size: 14px;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #007acc;
+      }
+      .row {
+        display: block;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background: #007acc;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #005a9e;
+      }
+      .results {
+        padding: 0;
+        background: transparent;
+        display: none;
+      }
+      .results .result-item {
+        margin-bottom: 15px;
+        padding: 12px;
+        background: #fafafa;
+        border-radius: 4px;
+        border: 1px solid #e0e0e0;
+      }
+      .placeholder {
+        text-align: center;
+        color: #666;
+        padding: 40px 20px;
+        font-style: italic;
+      }
+      .placeholder p {
+        margin: 0;
+        line-height: 1.6;
+      }
+      .compounding-results {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #e0e0e0;
+      }
+      .compounding-results h4 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .compounding-period {
+        margin-bottom: 25px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border-left: 4px solid #007acc;
+      }
+      .compounding-period h5 {
+        color: #555;
+        margin: 0 0 15px 0;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .result-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+      }
+      .result-label {
+        font-weight: 500;
+        color: #555;
+      }
+      .result-value {
+        font-weight: 600;
+        color: #333;
+      }
+      .status {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 4px;
+      }
+      .status.profitable {
+        background: #e8f5e8;
+        color: #2d5a2d;
+        border: 1px solid #c3e6c3;
+      }
+      .status.unprofitable {
+        background: #f8e8e8;
+        color: #5a2d2d;
+        border: 1px solid #e6c3c3;
+      }
+      .status.break-even {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+      .strategy-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #fafafa;
+        position: relative;
+      }
+      .strategy-item .remove-strategy {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        font-size: 12px;
+        line-height: 1;
+      }
+      .strategy-item .remove-strategy:hover {
+        background: #c82333;
+      }
+      .add-strategy {
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+      .add-strategy:hover {
+        background: #218838;
+      }
+      .help-text {
+        color: #666;
+        font-size: 13px;
+        margin-bottom: 15px;
+        font-style: italic;
+      }
+      .strategy-section {
+        margin-bottom: 40px;
+      }
+      .tab-navigation {
+        display: flex;
+        border-bottom: 2px solid #e0e0e0;
+        margin-bottom: 20px;
+      }
+      .tab-button {
+        background: none;
+        border: none;
+        padding: 12px 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s ease;
+      }
+      .tab-button:hover {
+        color: #007acc;
+        background: #f8f9fa;
+      }
+      .tab-button.active {
+        color: #007acc;
+        border-bottom-color: #007acc;
+      }
+      .tab-content {
+        display: block;
+      }
+      @media (max-width: 600px) {
+        .container {
+          padding: 20px;
+        }
+        .tab-button {
+          font-size: 12px;
+          padding: 10px 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="input-section">
+        <h1>Net APY Calculator</h1>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation" style="margin-bottom: 30px">
+          <button type="button" class="tab-button active" data-tab="calculator">
+            Net APY Calculator
+          </button>
+          <button type="button" class="tab-button" data-tab="reversal">
+            APY Target Calculator
+          </button>
+        </div>
+
+        <!-- Net APY Calculator Tab -->
+        <div id="calculator-tab" class="tab-content">
+          <form id="apyForm">
+            <div class="row">
+              <div>
+                <h3>Lending Strategies</h3>
+                <div id="lending-strategies">
+                  <div class="strategy-item">
+                    <div class="form-group">
+                      <label>Strategy Name (optional)</label>
+                      <input
+                        type="text"
+                        class="strategy-name"
+                        placeholder="e.g., Aave USDC"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Amount ($)</label>
+                      <input
+                        type="number"
+                        class="strategy-notional"
+                        step="0.01"
+                        placeholder="e.g., 1000"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>APY (%)</label>
+                      <input
+                        type="number"
+                        class="strategy-apy"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+                <button type="button" class="add-strategy" data-type="lending">
+                  + Add Lending Strategy
+                </button>
+              </div>
+
+              <div>
+                <h3>Borrowing Strategies (Optional)</h3>
+                <p class="help-text">
+                  Leave empty if you only want to calculate lending returns
+                </p>
+                <div id="borrowing-strategies">
+                  <div class="strategy-item">
+                    <div class="form-group">
+                      <label>Strategy Name (optional)</label>
+                      <input
+                        type="text"
+                        class="strategy-name"
+                        placeholder="e.g., Compound ETH"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Amount ($)</label>
+                      <input
+                        type="number"
+                        class="strategy-notional"
+                        step="0.01"
+                        placeholder="e.g., 1000"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>APY (%)</label>
+                      <input type="number" class="strategy-apy" step="0.01" />
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="add-strategy"
+                  data-type="borrowing"
+                >
+                  + Add Borrowing Strategy
+                </button>
+              </div>
+            </div>
+
+            <button type="submit">Calculate Net APY</button>
+          </form>
+        </div>
+
+        <!-- APY Target Calculator Tab -->
+        <div id="reversal-tab" class="tab-content" style="display: none">
+          <form id="targetApyForm">
+            <h3>APY Target Calculator</h3>
+            <p class="help-text">
+              Calculate the APY needed to achieve your target daily earnings
+            </p>
+
+            <div class="form-group">
+              <label>Target Daily Earning ($)</label>
+              <input
+                type="number"
+                id="target-daily-earning"
+                step="0.01"
+                placeholder="e.g., 100"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Investment Amount ($)</label>
+              <input
+                type="number"
+                id="target-notional"
+                step="0.01"
+                placeholder="e.g., 50000"
+                required
+              />
+            </div>
+
+            <button type="submit">Calculate Target APY</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="results-section">
+        <h3>Results</h3>
+
+        <!-- Net APY Results -->
+        <div id="results" class="results">
+          <div class="result-item">
+            <span class="result-label">Total Lending Capital:</span>
+            <span class="result-value" id="total_lending">$0.00</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Total Borrowing Capital:</span>
+            <span class="result-value" id="total_borrowing">$0.00</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Lending Daily Interest:</span>
+            <span class="result-value" id="daily_lending">$0.00</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Borrowing Daily Interest:</span>
+            <span class="result-value" id="daily_borrowing">$0.00</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Net Daily Interest:</span>
+            <span class="result-value" id="net_daily">$0.00</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Net APY:</span>
+            <span class="result-value" id="net_apy">0.00%</span>
+          </div>
+
+          <div id="status" class="status"></div>
+        </div>
+
+        <div
+          id="compounding-results"
+          class="compounding-results"
+          style="display: none"
+        >
+          <h4>Compounding Effects</h4>
+
+          <div class="compounding-period">
+            <h5>After 7 Days (1 Week)</h5>
+            <div class="result-item">
+              <span class="result-label">Lending Compounded:</span>
+              <span class="result-value" id="lending_7">$0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Borrowing Compounded:</span>
+              <span class="result-value" id="borrowing_7">$0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Net Compounded:</span>
+              <span class="result-value" id="net_7">$0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Total Portfolio Value:</span>
+              <span class="result-value" id="total_7">$0.00</span>
+            </div>
+          </div>
+
+          <div class="compounding-period">
+            <h5>After 30 Days (1 Month)</h5>
+            <div class="result-item">
+              <span class="result-label">Lending Compounded:</span>
+              <span class="result-value" id="lending_30">$0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Borrowing Compounded:</span>
+              <span class="result-value" id="borrowing_30">$0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Net Compounded:</span>
+              <span class="result-value" id="net_30">$0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Total Portfolio Value:</span>
+              <span class="result-value" id="total_30">$0.00</span>
+            </div>
+          </div>
+
+          <div class="compounding-period">
+            <h5>After 365 Days (1 Year)</h5>
+            <div class="result-item">
+              <span class="result-label">Lending Compounded:</span>
+              <span class="result-value" id="lending_365">$0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Borrowing Compounded:</span>
+              <span class="result-value" id="borrowing_365">$0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Net Compounded:</span>
+              <span class="result-value" id="net_365">$0.00</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">Total Portfolio Value:</span>
+              <span class="result-value" id="total_365">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Target APY Results -->
+        <div id="target-results" class="results" style="display: none">
+          <div class="result-item">
+            <span class="result-label">Target APY:</span>
+            <span class="result-value" id="target_apy_result">0.00%</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Daily Earning:</span>
+            <span class="result-value" id="target_daily_result">$0.00</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Investment Amount:</span>
+            <span class="result-value" id="target_notional_result">$0.00</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Annual Earning:</span>
+            <span class="result-value" id="target_annual_result">$0.00</span>
+          </div>
+        </div>
+
+        <div id="placeholder" class="placeholder">
+          <p>
+            Fill in your lending and/or borrowing strategies on the left and
+            click "Calculate Net APY" to see results here.
+          </p>
+        </div>
+
+        <div id="target-placeholder" class="placeholder" style="display: none">
+          <p>
+            Enter your target daily earning and investment amount, then click
+            "Calculate Target APY" to see the required APY.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Tab switching functionality
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        button.addEventListener("click", function () {
+          const tabName = this.dataset.tab;
+
+          // Remove active class from all buttons
+          document
+            .querySelectorAll(".tab-button")
+            .forEach((btn) => btn.classList.remove("active"));
+          // Add active class to clicked button
+          this.classList.add("active");
+
+          // Hide all tab contents
+          document
+            .querySelectorAll(".tab-content")
+            .forEach((content) => (content.style.display = "none"));
+          // Show selected tab content
+          document.getElementById(`${tabName}-tab`).style.display = "block";
+
+          // Show/hide appropriate placeholders and results
+          if (tabName === "calculator") {
+            document.getElementById("placeholder").style.display = "block";
+            document.getElementById("target-placeholder").style.display =
+              "none";
+            document.getElementById("results").style.display = "none";
+            document.getElementById("target-results").style.display = "none";
+          } else if (tabName === "reversal") {
+            document.getElementById("placeholder").style.display = "none";
+            document.getElementById("target-placeholder").style.display =
+              "block";
+            document.getElementById("results").style.display = "none";
+            document.getElementById("target-results").style.display = "none";
+          }
+        });
+      });
+
+      // Add strategy functionality
+      document.querySelectorAll(".add-strategy").forEach((button) => {
+        button.addEventListener("click", function () {
+          const type = this.dataset.type;
+          const container = document.getElementById(`${type}-strategies`);
+          const strategyItem = document.createElement("div");
+          strategyItem.className = "strategy-item";
+
+          strategyItem.innerHTML = `
+            <button type="button" class="remove-strategy" onclick="this.parentElement.remove()">×</button>
+            <div class="form-group">
+              <label>Strategy Name (optional)</label>
+              <input type="text" class="strategy-name" placeholder="e.g., ${
+                type === "lending" ? "Aave USDC" : "Compound ETH"
+              }" />
+            </div>
+            <div class="form-group">
+              <label>Amount ($)</label>
+              <input type="number" class="strategy-notional" step="0.01" placeholder="e.g., 1000" required />
+            </div>
+            <div class="form-group">
+              <label>APY (%)</label>
+              <input type="number" class="strategy-apy" step="0.01" required />
+            </div>
+          `;
+
+          container.appendChild(strategyItem);
+        });
+      });
+
+      // Target APY form submission
+      document
+        .getElementById("targetApyForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const dailyEarning = parseFloat(
+            document.getElementById("target-daily-earning").value
+          );
+          const notional = parseFloat(
+            document.getElementById("target-notional").value
+          );
+
+          if (
+            !dailyEarning ||
+            !notional ||
+            dailyEarning <= 0 ||
+            notional <= 0
+          ) {
+            alert("Please enter valid positive numbers for both fields");
+            return;
+          }
+
+          try {
+            const response = await fetch("/calculate-target-apy", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                daily_earning: dailyEarning,
+                notional: notional,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              document.getElementById(
+                "target_apy_result"
+              ).textContent = `${result.target_apy}%`;
+              document.getElementById(
+                "target_daily_result"
+              ).textContent = `$${result.daily_earning.toLocaleString()}`;
+              document.getElementById(
+                "target_notional_result"
+              ).textContent = `$${result.notional.toLocaleString()}`;
+              document.getElementById(
+                "target_annual_result"
+              ).textContent = `$${result.annual_earning.toLocaleString()}`;
+
+              // Hide placeholder and show results
+              document.getElementById("target-placeholder").style.display =
+                "none";
+              document.getElementById("target-results").style.display = "block";
+            } else {
+              alert("Error: " + result.error);
+            }
+          } catch (error) {
+            alert("Error calculating target APY: " + error.message);
+          }
+        });
+
+      // Form submission
+      document
+        .getElementById("apyForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Collect lending strategies
+          const lendingStrategies = [];
+          const lendingItems = document.querySelectorAll(
+            "#lending-strategies .strategy-item"
+          );
+          console.log("Found lending items:", lendingItems.length);
+
+          lendingItems.forEach((item, index) => {
+            const notional = parseFloat(
+              item.querySelector(".strategy-notional").value
+            );
+            const apy = parseFloat(item.querySelector(".strategy-apy").value);
+            const name = item.querySelector(".strategy-name").value;
+
+            console.log(`Lending ${index + 1}:`, { notional, apy, name });
+
+            if (notional && apy && notional > 0 && apy > 0) {
+              lendingStrategies.push({ notional, apy, name });
+            }
+          });
+
+          // Collect borrowing strategies
+          const borrowingStrategies = [];
+          const borrowingItems = document.querySelectorAll(
+            "#borrowing-strategies .strategy-item"
+          );
+          console.log("Found borrowing items:", borrowingItems.length);
+
+          borrowingItems.forEach((item, index) => {
+            const notional = parseFloat(
+              item.querySelector(".strategy-notional").value
+            );
+            const apy = parseFloat(item.querySelector(".strategy-apy").value);
+            const name = item.querySelector(".strategy-name").value;
+
+            console.log(`Borrowing ${index + 1}:`, { notional, apy, name });
+
+            if (notional && apy && notional > 0 && apy > 0) {
+              borrowingStrategies.push({ notional, apy, name });
+            }
+          });
+
+          const formData = {
+            lending_strategies: lendingStrategies,
+            borrowing_strategies: borrowingStrategies,
+          };
+
+          console.log("Form data being sent:", formData);
+          console.log("Lending strategies found:", lendingStrategies.length);
+          console.log(
+            "Borrowing strategies found:",
+            borrowingStrategies.length
+          );
+
+          try {
+            const response = await fetch("/calculate", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              document.getElementById(
+                "total_lending"
+              ).textContent = `$${result.total_lending_notional.toLocaleString()}`;
+              document.getElementById(
+                "total_borrowing"
+              ).textContent = `$${result.total_borrowing_notional.toLocaleString()}`;
+              document.getElementById(
+                "daily_lending"
+              ).textContent = `$${result.daily_lending_interest.toLocaleString()}`;
+              document.getElementById(
+                "daily_borrowing"
+              ).textContent = `$${result.daily_borrowing_interest.toLocaleString()}`;
+              document.getElementById(
+                "net_daily"
+              ).textContent = `$${result.net_daily_interest.toLocaleString()}`;
+              document.getElementById(
+                "net_apy"
+              ).textContent = `${result.net_apy}%`;
+
+              const statusDiv = document.getElementById("status");
+              if (result.break_even) {
+                statusDiv.textContent = `⚖️ Strategy is break-even - no profit or loss`;
+                statusDiv.className = "status break-even";
+              } else if (result.profitable) {
+                statusDiv.textContent = `✅ Strategy is profitable - earning $${result.net_daily_interest.toLocaleString()} daily`;
+                statusDiv.className = "status profitable";
+              } else {
+                statusDiv.textContent = `❌ Strategy is losing money - losing $${Math.abs(
+                  result.net_daily_interest
+                ).toLocaleString()} daily`;
+                statusDiv.className = "status unprofitable";
+              }
+
+              // Update compounding results
+              if (result.compounding) {
+                // 7 days
+                document.getElementById(
+                  "lending_7"
+                ).textContent = `$${result.compounding[
+                  "7_days"
+                ].lending_compounded.toLocaleString()}`;
+                document.getElementById(
+                  "borrowing_7"
+                ).textContent = `$${result.compounding[
+                  "7_days"
+                ].borrowing_compounded.toLocaleString()}`;
+                document.getElementById(
+                  "net_7"
+                ).textContent = `$${result.compounding[
+                  "7_days"
+                ].net_compounded.toLocaleString()}`;
+                document.getElementById(
+                  "total_7"
+                ).textContent = `$${result.compounding[
+                  "7_days"
+                ].total_value.toLocaleString()}`;
+
+                // 30 days
+                document.getElementById(
+                  "lending_30"
+                ).textContent = `$${result.compounding[
+                  "30_days"
+                ].lending_compounded.toLocaleString()}`;
+                document.getElementById(
+                  "borrowing_30"
+                ).textContent = `$${result.compounding[
+                  "30_days"
+                ].borrowing_compounded.toLocaleString()}`;
+                document.getElementById(
+                  "net_30"
+                ).textContent = `$${result.compounding[
+                  "30_days"
+                ].net_compounded.toLocaleString()}`;
+                document.getElementById(
+                  "total_30"
+                ).textContent = `$${result.compounding[
+                  "30_days"
+                ].total_value.toLocaleString()}`;
+
+                // 365 days
+                document.getElementById(
+                  "lending_365"
+                ).textContent = `$${result.compounding[
+                  "365_days"
+                ].lending_compounded.toLocaleString()}`;
+                document.getElementById(
+                  "borrowing_365"
+                ).textContent = `$${result.compounding[
+                  "365_days"
+                ].borrowing_compounded.toLocaleString()}`;
+                document.getElementById(
+                  "net_365"
+                ).textContent = `$${result.compounding[
+                  "365_days"
+                ].net_compounded.toLocaleString()}`;
+                document.getElementById(
+                  "total_365"
+                ).textContent = `$${result.compounding[
+                  "365_days"
+                ].total_value.toLocaleString()}`;
+
+                // Show compounding results
+                document.getElementById("compounding-results").style.display =
+                  "block";
+              }
+
+              // Hide placeholder and show results
+              document.getElementById("placeholder").style.display = "none";
+              document.getElementById("results").style.display = "block";
+            } else {
+              alert("Error: " + result.error);
+            }
+          } catch (error) {
+            alert("Error calculating APY: " + error.message);
+          }
+        });
+    </script>
+  </body>
+</html>
